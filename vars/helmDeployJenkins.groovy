@@ -12,7 +12,7 @@ def call(Map config = [:]) {
      * kubeconfigCred   (obligatorio) → credentialId tipo "Secret file"
      * elbId            (obligatorio) → ID del ELB creado por Terraform
      * elbIp            (obligatorio) → IP pública del ELB
-     * sfsIp            (obligatorio) → IP privada del SFS
+     * sfsId            (obligatorio) → ID del SFS
      * releaseName      (opcional)    → Nombre del release Helm default: jenkins
      * namespace        (opcional)    → Namespace Kubernetes default: jekins
      * healthEndpoint   (opcional)    → Endpoint HTTP para health check default: /login
@@ -42,6 +42,22 @@ def call(Map config = [:]) {
 
                 echo ""
                 echo "=========================================="
+                echo "Obteniendo IP interna del mount target para SFS ID: ${config.sfsId}"
+                echo "=========================================="
+
+                SFS_IP=\$(hwcloud sfs turbo mount-target list --fs-id ${config.sfsId} \\
+                          | grep 'IP Address' | head -n1 | awk '{print \$3}')
+
+                if [ -z "\$SFS_IP" ]; then
+                  echo "ERROR: No se pudo obtener la IP interna del mount target del SFS."
+                  exit 1
+                fi
+
+                echo "IP interna obtenida: \$SFS_IP"
+                export SFS_IP
+
+                echo ""
+                echo "=========================================="
                 echo "Desplegando Helm Release: ${releaseName}"
                 echo "Namespace: ${namespace}"
                 echo "Chart: ${config.chartDir}"
@@ -53,7 +69,7 @@ def call(Map config = [:]) {
                   --wait \\
                   --timeout ${timeoutSeconds}s \\
                   --set elb.id=${config.elbId} \\
-                  --set persistence.sfsip=${config.sfsip}
+                  --set persistence.sfsip=\$SFS_IP
 
                 echo ""
                 echo "=========================================="

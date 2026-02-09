@@ -44,16 +44,17 @@ def call(Map config = [:]) {
                 echo "=========================================="
                 echo "Obteniendo IP interna del mount target para SFS ID: ${config.sfsId}"
                 echo "=========================================="
+                echo "Obteniendo IP interna del mount target para SFS ID: ${config.sfsId}"
 
-                SFS_IP=\$(hwcloud sfs turbo mount-target list --fs-id ${config.sfsId} \\
-                          | grep 'IP Address' | head -n1 | awk '{print \$3}')
+                SFS_IP=$(hcloud sfs turbo mount-target list --fs-id ${config.sfsId} -f json \
+                        | jq -r '.mount_targets[0].ip_address')
 
-                if [ -z "\$SFS_IP" ]; then
+                if [ -z "$SFS_IP" ]; then
                   echo "ERROR: No se pudo obtener la IP interna del mount target del SFS."
                   exit 1
                 fi
 
-                echo "IP interna obtenida: \$SFS_IP"
+                echo "IP interna obtenida: $SFS_IP"
                 export SFS_IP
 
                 echo ""

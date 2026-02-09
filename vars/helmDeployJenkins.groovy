@@ -53,7 +53,7 @@ def call(Map config = [:]) {
                   --wait \\
                   --timeout ${timeoutSeconds}s \\
                   --set elb.id=${config.elbId} \\
-                  --set persistence.sfsip=${config.sfsIp}
+                  --set persistence.sfsip=${config.sfsip}
 
                 echo ""
                 echo "=========================================="

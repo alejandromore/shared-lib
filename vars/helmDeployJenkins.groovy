@@ -12,6 +12,7 @@ def call(Map config = [:]) {
      * kubeconfigCred   (obligatorio) → credentialId tipo "Secret file"
      * elbId            (obligatorio) → ID del ELB creado por Terraform
      * elbIp            (obligatorio) → IP pública del ELB
+     * sfsIp            (obligatorio) → IP privada del SFS
      * releaseName      (opcional)    → Nombre del release Helm default: jenkins
      * namespace        (opcional)    → Namespace Kubernetes default: jekins
      * healthEndpoint   (opcional)    → Endpoint HTTP para health check default: /login
@@ -51,7 +52,8 @@ def call(Map config = [:]) {
                   --create-namespace \\
                   --wait \\
                   --timeout ${timeoutSeconds}s \\
-                  --set elb.id=${config.elbId}
+                  --set elb.id=${config.elbId} \\
+                  --set sfs.ip=${config.sfsIp}
 
                 echo ""
                 echo "=========================================="

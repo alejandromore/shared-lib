@@ -17,6 +17,7 @@ def call(Map config = [:]) {
      * namespace        (opcional)    → Namespace Kubernetes default: jekins
      */
     def releaseName    = config.releaseName    ?: 'infra'
+    def namespace      = config.namespace      ?: 'infra'
 
     ansiColor('xterm') {
         dir(config.dir) {

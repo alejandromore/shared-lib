@@ -55,7 +55,7 @@ def call(Map config = [:]) {
                   --create-namespace \\
                   --wait \\
                   --timeout ${timeoutSeconds}s \\
-                  --set elb.id=${config.elbId} \\
+                  --set elbId=${config.elbId} \\
                   --set persistence.sfsId=${config.sfsId} \\
                   --set persistence.sfsTurboSharedPath=${config.sfs_turbo_shared_path} \\
                   --set enterpriseProjectId=${config.enterpriseProjectId}

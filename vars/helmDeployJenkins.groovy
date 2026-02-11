@@ -12,8 +12,6 @@ def call(Map config = [:]) {
      * kubeconfigCred   (obligatorio) → credentialId tipo "Secret file"
      * elbId            (obligatorio) → ID del ELB creado por Terraform
      * elbIp            (obligatorio) → IP pública del ELB
-     * sfsId            (obligatorio) → ID del SFS
-     * sfs_turbo_shared_path (obligatorio) → Ruta compartida del SFS
      * enterpriseProjectId (obligatorio) → ID del proyecto empresarial
      * releaseName      (opcional)    → Nombre del release Helm default: jenkins
      * namespace        (opcional)    → Namespace Kubernetes default: jekins
@@ -56,8 +54,6 @@ def call(Map config = [:]) {
                   --wait \\
                   --timeout ${timeoutSeconds}s \\
                   --set elb.elbId=${config.elbId} \\
-                  --set persistence.sfsId=${config.sfsId} \\
-                  --set persistence.sfsTurboSharedPath=${config.sfs_turbo_shared_path} \\
                   --set enterpriseProjectId=${config.enterpriseProjectId}
 
                 echo ""

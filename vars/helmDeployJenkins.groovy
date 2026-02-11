@@ -13,11 +13,14 @@ def call(Map config = [:]) {
      * elbId            (obligatorio) → ID del ELB creado por Terraform
      * elbIp            (obligatorio) → IP pública del ELB
      * sfsId            (obligatorio) → ID del SFS
+     * sfs_turbo_shared_path (obligatorio) → Ruta compartida del SFS
+     * enterpriseProjectId (obligatorio) → ID del proyecto empresarial
      * releaseName      (opcional)    → Nombre del release Helm default: jenkins
      * namespace        (opcional)    → Namespace Kubernetes default: jekins
      * healthEndpoint   (opcional)    → Endpoint HTTP para health check default: /login
      * timeoutSeconds   (opcional)    → Timeout máximo de espera default: 300
      */
+
 
     def releaseName    = config.releaseName    ?: 'jenkins'
     def namespace      = config.namespace      ?: 'jekins'
@@ -42,21 +45,6 @@ def call(Map config = [:]) {
 
                 echo ""
                 echo "=========================================="
-                echo "Obteniendo IP interna del mount target para SFS ID: ${config.sfsId}"
-                echo "=========================================="
-
-                SFS_IP=\$(hcloud sfs turbo mount-target list --fs-id ${config.sfsId} -f json \
-                        | jq -r '.mount_targets[0].ip_address')
-
-                if [ -z "\$SFS_IP" ]; then
-                  echo "ERROR: No se pudo obtener la IP interna del mount target del SFS."
-                  exit 1
-                fi
-
-                echo "IP interna obtenida: \$SFS_IP"
-
-                echo ""
-                echo "=========================================="
                 echo "Desplegando Helm Release: ${releaseName}"
                 echo "Namespace: ${namespace}"
                 echo "Chart: ${config.chartDir}"
@@ -68,7 +56,9 @@ def call(Map config = [:]) {
                   --wait \\
                   --timeout ${timeoutSeconds}s \\
                   --set elb.id=${config.elbId} \\
-                  --set persistence.sfsip=\$SFS_IP
+                  --set persistence.sfsId=${config.sfsId} \\
+                  --set persistence.sfsTurboSharedPath=${config.sfs_turbo_shared_path} \\
+                  --set enterpriseProjectId=${config.enterpriseProjectId}
 
                 echo ""
                 echo "=========================================="

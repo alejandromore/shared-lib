@@ -1,31 +1,46 @@
 def call(Map config = [:]) {
 
     /*
-     * Parámetros esperados:
+     * Parámetros:
      *
-     * dir        (obligatorio) → directorio de Terraform
-     * varsFile   (opcional)    → archivo tfvars (default: local.tfvars)
-     * action     (opcional)    → deploy | destroy (default: deploy)
-     * outputs    (opcional)    → lista de outputs a capturar
-     * project    (opcional)    → huaweidemo_dev (default:null)
+     * dir             (obligatorio)
+     * varsFile        (opcional)
+     * action          (opcional)
+     * outputs         (opcional)
+     * project         (opcional) → app-env (ej: huaweidemo-dev)
+     * backendSuffix   (opcional) → standard | workload-identity
      */
 
     if (!config.dir) {
         error "terraformDeploy: 'dir' es obligatorio"
     }
 
-    def tfVarsFile = config.varsFile ?: 'local.tfvars'
-    def action     = config.action   ?: 'deploy'
-    def outputs    = config.outputs  ?: []
-    def project    = config.project  ?: null
+    def tfVarsFile    = config.varsFile ?: 'local.tfvars'
+    def action        = config.action   ?: 'deploy'
+    def outputs       = config.outputs  ?: []
+    def project       = config.project  ?: null
+    def backendSuffix = config.backendSuffix ?: null
 
     ansiColor('xterm') {
         dir(config.dir) {
 
+            // ============================
+            // Setear app_env dinámico
+            // ============================
+            if (project) {
+                env.TF_VAR_app_env = project.replace("_", "-")
+                echo "Terraform app_env = ${env.TF_VAR_app_env}"
+            }
+
+            // ============================
+            // Backend config dinámico
+            // ============================
             def backendArg = ""
 
-            if (project) {
-                backendArg = "-backend-config='key=${project}-standard.tfstate'"
+            if (project && backendSuffix) {
+                backendArg = "-backend-config='key=${project}-${backendSuffix}.tfstate'"
+            } else if (project) {
+                backendArg = "-backend-config='key=${project}.tfstate'"
             }
 
             sh """
@@ -39,7 +54,6 @@ def call(Map config = [:]) {
                 sh "terraform plan -var-file='${tfVarsFile}'"
                 sh "terraform apply -auto-approve -var-file='${tfVarsFile}'"
 
-                // Captura outputs si fueron definidos
                 outputs.each { outputName ->
                     def value = sh(
                         script: "terraform output -raw ${outputName}",

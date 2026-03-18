@@ -7,6 +7,7 @@ def call(Map config = [:]) {
      * varsFile   (opcional)    → archivo tfvars (default: local.tfvars)
      * action     (opcional)    → deploy | destroy (default: deploy)
      * outputs    (opcional)    → lista de outputs a capturar
+     * project    (opcional)    → huaweidemo_dev (default:null)
      */
 
     if (!config.dir) {
@@ -16,15 +17,22 @@ def call(Map config = [:]) {
     def tfVarsFile = config.varsFile ?: 'local.tfvars'
     def action     = config.action   ?: 'deploy'
     def outputs    = config.outputs  ?: []
+    def project    = config.project  ?: null
 
     ansiColor('xterm') {
         dir(config.dir) {
 
-            sh '''
+            def backendArg = ""
+
+            if (project) {
+                backendArg = "-backend-config='key=${project}-standard.tfstate'"
+            }
+
+            sh """
               set -e
               rm -rf .terraform
-              terraform init
-            '''
+              terraform init ${backendArg}
+            """
 
             if (action == 'deploy') {
 

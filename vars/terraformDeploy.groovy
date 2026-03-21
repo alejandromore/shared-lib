@@ -1,6 +1,5 @@
 def call(Map config = [:]) {
 
-```
 /*
  * Parámetros:
  *
@@ -109,6 +108,5 @@ ansiColor('xterm') {
         }
     }
 }
-```
 
 }
